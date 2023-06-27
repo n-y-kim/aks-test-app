@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<head>
+    <title>API Test Page</title>
+    <script>
+        function callApi() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/callapi');
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    document.getElementById('apiResult').innerHTML = xhr.responseText;
+                }
+                else {
+                    alert('Request failed.  Returned status of ' + xhr.status);
+                }
+            };
+            xhr.send();
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('btn').addEventListener('click', callApi);
+        });
+    </script>
+</head>
+<body>
+    <h1>Press the button for external api call</h1>
+    <button id="btn">Click me</button>
+    <div id="apiResult"></div>
+</body>

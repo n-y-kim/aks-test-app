@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: outbound-test-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: outbound-test-app
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5 
+  template:
+    metadata:
+      labels:
+        app: outbound-test-app
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: outbound-test-app
+        image: voteappacr0626.azurecr.io/outbound-test-app:v1
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 250m
+          limits:
+            cpu: 500m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: outbound-test-app
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: outbound-test-app
