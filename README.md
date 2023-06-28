@@ -64,4 +64,22 @@ docker push <acrLoginServer>/outbound-test-app:v1
 az aks create --resource-group myResourceGroup --name myAKSCluster --node-count 1 --enable-addons monitoring --generate-ssh-keys --attach-acr <acrName>
 ```
 
-2. 
+2. Get AKS credentials
+```bash
+az aks get-credentials --resource-group myResourceGroup --name myAKSCluster
+```
+3. Update manifest file
+```bash
+vi outbound-test-app.yaml
+```
+Replace image name with your ACR image name.
+```yaml
+containers:
+      - name: outbound-test-app
+        image: <acrLoginServer>/outbound-test-app:v1
+```
+
+4. Deploy app
+```bash
+kubectl apply -f outbound-test-config.yml
+``` 
