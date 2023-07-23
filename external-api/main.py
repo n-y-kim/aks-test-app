@@ -4,7 +4,7 @@ from opencensus.trace.samplers import ProbabilitySampler
 from opencensus.trace.tracer import Tracer
 import os
 
-app = FastAPI()\
+app = FastAPI()
 
 #Get Instrumentation Key from environment variable
 ikey = os.environ.get('APPINSIGHTS_INSTRUMENTATION_KEY')

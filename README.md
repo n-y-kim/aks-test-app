@@ -18,6 +18,8 @@ Deploy external-api with `SCM_DO_BUILD_DURING_DEPLOYMENT` set to `1` & `pip inst
 After deployment, try `curl <YOUR_URL>` to see if it works.
 It needs to reply with `{"message":"Hello World"}`.
 
+> Since python applications need additional settings within code level for the Application Insights & Loggings, this app is using `opencensus-ext-azure` library to automatically send logs to Application Insights.
+
 ## Running in local
 
 Update `main.py` request url to the external api app.
@@ -167,7 +169,9 @@ kubectl apply -f internal-lb-test-config.yml
 
 ## Monitor result
 ### Outbound Test Config
-* Check AKS logs. Look for container logs.
+Go to the Web App you deployed earlier. Click `Logs` in the left menu. Check the HTTP requests logs.
+
+![webapp-logs](./appservice_logs.png)
 
 ### Internal LB Test Config
 1. Check Internal LB
