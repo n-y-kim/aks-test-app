@@ -33,7 +33,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: outbound-test-app
+  name: outbound-test-service
 spec:
   #type: LoadBalancer
   ports:
@@ -53,7 +53,7 @@ spec:
       paths:
       - backend:
           service:
-            name: outbound-test-app
+            name: outbound-test-service
             port:
               number: 80
         path: /

@@ -1,6 +1,10 @@
-# Sample Test App for Outbound API call
+# Sample Test App for AKS
 
-Testing if outbound ip address could be fixed with NAT Gateway.
+There are multiple use cases in this repo.
+
+1. `outbound-test-config.yml`: Example of **`application gateway ingress controller`** with `kubenet`. Calls external api. Track down what is the source ip address of the request.
+   
+2. `internal-lb-test-config.yml`: Example of `internal load balancer` with `application gateway` **infront**. 
 
 ## Pre-requisites
 * Resource group
@@ -58,6 +62,78 @@ docker tag outbound-test-app <acrLoginServer>/outbound-test-app:v1
 docker push <acrLoginServer>/outbound-test-app:v1
 ```
 
+<!-- ## Editing `outbound-test-app.yaml` manifest file for `Azure CNI`(Advanced Networking)
+If you are using Azure CNI(Advanced networking) for the cluster, you need to delete `outbound-test-service` from the manifest file.
+
+This is because when you use `kubenet` as the networking plugin, the pods are assigned an IP address from another subnet from the Azure VNET. This means that the pods do not know each others' IP addresses and cannot communicate with each other directly. They need a single ClusterIP service to be able to communicate with each other.
+
+In conclusion, using `kubenet` would not benefit from using the Application Gateway Ingress Controller as specified in this [documentation](https://azure.microsoft.com/en-us/blog/application-gateway-ingress-controller-for-azure-kubernetes-service/). 
+
+The benefits of using the AGIC are first, reducing the additional hops and connecting directly to the pods and second, using the Application Gateway features such as WAF, URL-based routing, SSL termination, etc. However as mentioned, `kubenet` does not allow the pods to communicate with each other directly and therefore would actually miss the first benefit of using the AGIC.
+
+```yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: outbound-test-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: outbound-test-app
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5 
+  template:
+    metadata:
+      labels:
+        app: outbound-test-app
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: outbound-test-app
+        image: voteappacr0626.azurecr.io/outbound-test-app:v1
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 250m
+          limits:
+            cpu: 500m
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: outbound-test-service
+# spec:
+#   #type: LoadBalancer
+#   ports:
+#   - port: 80
+#   selector:
+#     app: outbound-test-app
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: outbound-test-app
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+spec:
+  rules:
+  - http:
+      paths:
+      - backend:
+          service:
+            name: outbound-test-app #Update here to outbound-test-app
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+``` -->
+
 ## Deploying to Azure Kubernets Service
 1. Create AKS
 ```bash
@@ -83,3 +159,46 @@ containers:
 ```bash
 kubectl apply -f outbound-test-config.yml
 ``` 
+OR
+
+```bash
+kubectl apply -f internal-lb-test-config.yml
+```
+
+## Monitor result
+### Outbound Test Config
+* Check AKS logs. Look for container logs.
+
+### Internal LB Test Config
+1. Check Internal LB
+   ```bash
+   kubectl get service
+   ```
+
+   Get detail info.
+   ```bash
+   kubectl describe service internal-app
+   ```
+
+   The `CLUSTER-IP` shows internal ip address from the service CIDR. The `EXTERNAL-IP` is from the subnet where AKS is actually placed, and it is **not a real public ip address**. It is the internal ip address of the load balancer which is used to access the backend pools.
+
+   ![internal-lb](./internalapp_info.png)
+
+2. CURL internal load balancer.
+
+   * Create temporary pod to test.
+   ```bash
+   kubectl run tmp-shell --rm -i --tty --image nicolaka/netshoot -- /bin/bash
+   ```
+
+   ```
+   curl http://<INTERNAL LB's EXTERNAL IP>/callapi
+   ```
+
+   * Result
+   ```bash
+   Hello World!
+   ```
+
+
+3. Check AKS logs. Look for container logs.
