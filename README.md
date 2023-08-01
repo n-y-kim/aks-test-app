@@ -6,6 +6,8 @@ There are multiple use cases in this repo.
    
 2. `internal-lb-test-config.yml`: Example of `internal load balancer` with `application gateway` **infront**. 
 
+3. `istio-internal-config.yml`: Example of `Istio Gateway(ServiceMesh)` integrated with AKS. Configured with Internal Load Balancer + Istio Gateway + Istio VirtualService. For more information about `Istio Gateway`, check this [page.](ISTIO_README.md)
+
 ## Pre-requisites
 * Resource group
 
@@ -171,7 +173,7 @@ kubectl apply -f internal-lb-test-config.yml
 ### Outbound Test Config
 Go to the Web App you deployed earlier. Click `Logs` in the left menu. Check the HTTP requests logs.
 
-![webapp-logs](./appservice_logs.png)
+![webapp-logs](./docs/appservice_logs.png)
 
 ### Internal LB Test Config
 1. Check Internal LB
@@ -186,7 +188,7 @@ Go to the Web App you deployed earlier. Click `Logs` in the left menu. Check the
 
    The `CLUSTER-IP` shows internal ip address from the service CIDR. The `EXTERNAL-IP` is from the subnet where AKS is actually placed, and it is **not a real public ip address**. It is the internal ip address of the load balancer which is used to access the backend pools.
 
-   ![internal-lb](./internalapp_info.png)
+   ![internal-lb](./docs/internalapp_info.png)
 
 2. CURL internal load balancer.
 
