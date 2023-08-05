@@ -159,15 +159,40 @@ containers:
         image: <acrLoginServer>/outbound-test-app:v1
 ```
 
-4. Deploy app
-```bash
-kubectl apply -f outbound-test-config.yml
-``` 
-OR
+4. Deploy app 
+  
+    i) `outbound-test-config.yml`: Example of **`application gateway ingress controller`** with `kubenet`
+   ```bash
+   kubectl apply -f outbound-test-config.yml
+   ``` 
 
-```bash
-kubectl apply -f internal-lb-test-config.yml
-```
+   ii)  `internal-lb-test-config.yml`: Example of `internal load balancer` with `application gateway` **infront**
+
+   ```bash
+   kubectl apply -f internal-lb-test-config.yml
+   ```
+    iii) `istio-internal-config.yml`: Example of `Istio Gateway(ServiceMesh)` integrated with AKS
+
+    * Choose HTTP/HTTPS. Open `istio-internal-config.yml` and uncomment the protocol you want to use.
+    ```bash
+      - port:
+      # HTTPS protocol uses TLS passthrough
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: https-secret
+      # HTTP
+      # number: 80
+      # name: http
+      # protocol: HTTP
+    ```
+    
+    * If you want to make it HTTPS, you need to create a secret called `https-secret`. This should be a TLS certificate and key pair. **If it is signed by a certified CA**, such as Google CA, the **CA certificate should be included in the secret along with the server certificate and key pair.** 
+    * If it is not signed by a CA and you want to **make your own CA**, you should set CA certificate & key pair first. 
+      * After that, create a server certificate and key pair signed by the CA. Then, create a secret with the CA certificate, server certificate and key pair.
+      * And the client should have the CA certificate to verify the server certificate.
 
 ## Monitor result
 ### Outbound Test Config

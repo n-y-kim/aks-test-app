@@ -7,9 +7,17 @@ spec:
     istio: aks-istio-ingressgateway-internal
   servers:
   - port:
-      number: 80
-      name: http
-      protocol: HTTP
+      # HTTPS protocol uses TLS passthrough
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: https-secret
+      # HTTP
+      # number: 80
+      # name: http
+      # protocol: HTTP
     hosts:
     - "*"
 ---
