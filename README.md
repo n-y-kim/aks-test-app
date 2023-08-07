@@ -195,7 +195,6 @@ containers:
         ```bash
         kubectl create -n aks-istio-ingress secret tls https-secret --key=<KEYFILE> --cert=<CERTFILE>
         ```
-      * And the client should have the CA certificate to verify the server certificate.
 
 ## Monitor result
 ### Outbound Test Config
@@ -236,3 +235,44 @@ Go to the Web App you deployed earlier. Click `Logs` in the left menu. Check the
 
 
 3. Check AKS logs. Look for container logs.
+
+### Istio Internal Test Config
+> If you deployed `private` AKS cluster, follow this step. If its public, skip to this step.
+
+1. Use `invoke command` to get the ip address of the internal load balancer.
+  ```bash
+   az aks command invoke -g $RESOURCE_GROUP -n $CLUSTER --command "kubectl get svc aks-istio-ingressgateway-internal -n aks-istio-ingress"
+  ```
+> This step is for `public` AKS cluster.
+
+1. Use `kubectl get svc` to get the ip address of the internal load balancer.
+    ```bash
+    kubectl get svc aks-istio-ingressgateway-internal -n aks-istio-ingress
+    ```
+
+    Retreive the **EXTERNAL_IP** address.
+
+  ![Istio-internal](./docs/istio-lb-ip.png)
+
+2. For private cluster, use additional VM inside the same VNet with AKS cluster to make curl.
+  ```bash
+  curl -v "https://10.1.1.8:443"
+  ```
+
+  OR 
+
+  ```bash
+  curl -v "http://10.1.1.8:80"
+  ```
+
+2. For public cluster, just make a curl anywhere you want.
+
+  ```bash
+  curl -v "https://10.1.1.8:443"
+  ```
+
+  OR 
+
+  ```bash
+  curl -v "http://10.1.1.8:80"
+  ```
