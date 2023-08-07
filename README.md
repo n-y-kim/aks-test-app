@@ -189,9 +189,12 @@ containers:
       # protocol: HTTP
     ```
     
-    * If you want to make it HTTPS, you need to create a secret called `https-secret`. This should be a TLS certificate and key pair. **If it is signed by a certified CA**, such as Google CA, the **CA certificate should be included in the secret along with the server certificate and key pair.** 
+    * If you want to make it HTTPS, you need to create a secret called `https-secret`. This should be a TLS certificate and key pair. **If it is signed by a certified CA**, such as Google, the **CA certificate should be included in the secret along with the server certificate and key pair.** 
     * If it is not signed by a CA and you want to **make your own CA**, you should set CA certificate & key pair first. 
       * After that, create a server certificate and key pair signed by the CA. Then, create a secret with the CA certificate, server certificate and key pair.
+        ```bash
+        kubectl create -n aks-istio-ingress secret tls https-secret --key=<KEYFILE> --cert=<CERTFILE>
+        ```
       * And the client should have the CA certificate to verify the server certificate.
 
 ## Monitor result
