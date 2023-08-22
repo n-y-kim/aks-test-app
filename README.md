@@ -1,12 +1,35 @@
 # Sample Test App for AKS
 
-There are multiple use cases in this repo.
+- [Sample Test App for AKS](#sample-test-app-for-aks)
+  - [Use cases](#use-cases)
+    - [1. `outbound-test-config.yml`](#1-outbound-test-configyml)
+    - [2. `internal-lb-test-config.yml`](#2-internal-lb-test-configyml)
+    - [3. `istio-internal-config.yml`](#3-istio-internal-configyml)
+  - [Pre-requisites](#pre-requisites)
+  - [Deploying external API app](#deploying-external-api-app)
+  - [Running in local](#running-in-local)
+  - [Upload the image to Azure Container Registry](#upload-the-image-to-azure-container-registry)
+  - [Deploying to Azure Kubernets Service](#deploying-to-azure-kubernets-service)
+  - [Monitor result](#monitor-result)
+    - [Outbound Test Config](#outbound-test-config)
+    - [Internal LB Test Config](#internal-lb-test-config)
+    - [Istio Internal Test Config](#istio-internal-test-config)
 
-1. `outbound-test-config.yml`: Example of **`application gateway ingress controller`** with `kubenet`. Calls external api. Track down what is the source ip address of the request.
+
+There are multiple use cases in this repo. 
+
+Check `manifest` folder for `yaml` files. Check `api-call-app` folder for the sample app, and check `external-api-app` folder for the external api app.
+
+## Use cases
+
+### 1. `outbound-test-config.yml`
+Example of **`application gateway ingress controller`** with `kubenet`. Calls external api. Track down what is the source ip address of the request.
    
-2. `internal-lb-test-config.yml`: Example of `internal load balancer` with `application gateway` **infront**. 
+### 2. `internal-lb-test-config.yml`
+Example of `internal load balancer` with `application gateway` **infront**. 
 
-3. `istio-internal-config.yml`: Example of `Istio Gateway(ServiceMesh)` integrated with AKS. Configured with Internal Load Balancer + Istio Gateway + Istio VirtualService. For more information about `Istio Gateway`, check this [page.](ISTIO_README.md)
+### 3. `istio-internal-config.yml`
+Example of `Istio Gateway(ServiceMesh)` integrated with AKS. Configured with Internal Load Balancer + Istio Gateway + Istio VirtualService. For more information about `Istio Gateway`, check this [page.](ISTIO_README.md)
 
 ## Pre-requisites
 * Resource group
@@ -190,7 +213,7 @@ containers:
     ```
     
     * If you want to make it HTTPS, you need to create a secret called `https-secret`. This should be a TLS certificate and key pair. **If it is signed by a certified CA**, such as Google, the **CA certificate should be included in the secret along with the server certificate and key pair.** 
-    * If it is not signed by a CA and you want to **make your own CA**, you should set CA certificate & key pair first. 
+    * If it is not signed by a CA and you want to **make your own CA**, you should set CA certificate & key pair first. This procedure can use [AKS custom CA add-on](https://learn.microsoft.com/en-us/azure/aks/custom-certificate-authority).
       * After that, create a server certificate and key pair signed by the CA. Then, create a secret with the CA certificate, server certificate and key pair.
         ```bash
         kubectl create -n aks-istio-ingress secret tls https-secret --key=<KEYFILE> --cert=<CERTFILE>
