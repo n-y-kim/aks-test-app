@@ -2,6 +2,12 @@
 <head>
     <title>API Test Page</title>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('btn').addEventListener('click', callApi);
+            document.getElementById('btn2').addEventListener('click', postDB);
+            document.getElementById('btn3').addEventListener('click', getDB);
+        });
+
         function callApi() {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', '/callapi');
@@ -15,13 +21,54 @@
             };
             xhr.send();
         }
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('btn').addEventListener('click', callApi);
-        });
+
+        function postDB() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/postDB');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    document.getElementById('dbResult').innerHTML = xhr.responseText;
+                }
+                else {
+                    alert('Request failed.  Returned status of ' + xhr.status);
+                }
+            };
+            var name = document.getElementById('name').value;
+            var email = document.getElementById('email').value;
+            xhr.send(JSON.stringify({name: name, email: email}));
+            
+        }
+
+        function getDB() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/callDB');
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    document.getElementById('dbResult2').innerHTML = xhr.responseText;
+                }
+                else {
+                    alert('Request failed.  Returned status of ' + xhr.status);
+                }
+            };
+            xhr.send();
+        }
     </script>
 </head>
 <body>
     <h1>Press the button for external api call</h1>
     <button id="btn">Click me</button>
     <div id="apiResult"></div>
+
+    <h1>Database Test</h1>
+    <h2>Update</h2>
+    <input type="text" id="name" placeholder="Enter name">
+    <input type="text" id="email" placeholder="Enter email">
+    <button id="btn2">Click me</button>
+    <div id="dbResult"></div>
+
+    <h2>Read</h2>
+    <button id="btn3">Click me</button>
+    <div id="dbResult2"></div>
+
 </body>
