@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lb-test-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lb-test-app
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5 
+  template:
+    metadata:
+      labels:
+        app: lb-test-app
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: lb-test-app
+        image: voteappacr0626.azurecr.io/outbound-test-app:v1
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 250m
+          limits:
+            memory: 512Mi
+            cpu: 500m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: internal-app
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: lb-test-app
+# ---
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: lb-test-app
+#   annotations:
+#     kubernetes.io/ingress.class: azure/application-gateway
+# spec:
+#   rules:
+#   - http:
+#       paths:
+#       - backend:
+#           service:
+#             name: outbound-test-service
+#             port:
+#               number: 80
+#         path: /
+#         pathType: Prefix
