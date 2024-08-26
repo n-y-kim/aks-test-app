@@ -3,15 +3,15 @@
 - [Sample Test App for AKS](#sample-test-app-for-aks)
   - [Use cases](#use-cases)
     - [1. `outbound-test-config.yml`](#1-outbound-test-configyml)
-    - [2. `istio-internal-config.yml`](#3-istio-internal-configyml)
-  - [Pre-requisites](#pre-requisites)
-  - [Deploying external API app](#deploying-external-api-app)
-  - [Running in local](#running-in-local)
-  - [Upload the image to Azure Container Registry](#upload-the-image-to-azure-container-registry)
-  - [Deploying to Azure Kubernets Service](#deploying-to-azure-kubernets-service)
-  - [Monitor result](#monitor-result)
-    - [Outbound Test Config](#outbound-test-config)
-    - [Internal LB Test Config](#internal-lb-test-config)
+    - [2. `istio-internal-config.yml`](#2-istio-internal-configyml)
+  - [Test scenario 1: `api-call-app` in AKS \& `external-api-app` in App service. Call external api from AKS.](#test-scenario-1-api-call-app-in-aks--external-api-app-in-app-service-call-external-api-from-aks)
+    - [Deploying external API app](#deploying-external-api-app)
+    - [Running in local](#running-in-local)
+    - [Upload the image to Azure Container Registry](#upload-the-image-to-azure-container-registry)
+    - [Deploying to Azure Kubernets Service](#deploying-to-azure-kubernets-service)
+  - [Test scenario 2: Istio Service Mesh add-on with private LB](#test-scenario-2-istio-service-mesh-add-on-with-private-lb)
+    - [Pre-requisites](#pre-requisites)
+    - [Istio HTTP/HTTPS configuration](#istio-httphttps-configuration)
     - [Istio Internal Test Config](#istio-internal-test-config)
 
 
@@ -26,9 +26,6 @@ Example of **`application gateway ingress controller`** with `kubenet`. Calls ex
 
 ### 2. `istio-internal-config.yml`
 Example of `Istio Gateway(ServiceMesh)` integrated with AKS. Configured with Internal Load Balancer + Istio Gateway + Istio VirtualService. For more information about `Istio Gateway`, check this [page.](ISTIO_README.md)
-
-## Pre-requisites
-* Resource group
 
 ## Test scenario 1: `api-call-app` in AKS & `external-api-app` in App service. Call external api from AKS.
 
