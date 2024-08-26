@@ -3,8 +3,7 @@
 - [Sample Test App for AKS](#sample-test-app-for-aks)
   - [Use cases](#use-cases)
     - [1. `outbound-test-config.yml`](#1-outbound-test-configyml)
-    - [2. `internal-lb-test-config.yml`](#2-internal-lb-test-configyml)
-    - [3. `istio-internal-config.yml`](#3-istio-internal-configyml)
+    - [2. `istio-internal-config.yml`](#3-istio-internal-configyml)
   - [Pre-requisites](#pre-requisites)
   - [Deploying external API app](#deploying-external-api-app)
   - [Running in local](#running-in-local)
@@ -24,17 +23,16 @@ Check `manifest` folder for `yaml` files. Check `api-call-app` folder for the sa
 
 ### 1. `outbound-test-config.yml`
 Example of **`application gateway ingress controller`** with `kubenet`. Calls external api. Track down what is the source ip address of the request.
-   
-### 2. `internal-lb-test-config.yml`
-Example of `internal load balancer` with `application gateway` **infront**. 
 
-### 3. `istio-internal-config.yml`
+### 2. `istio-internal-config.yml`
 Example of `Istio Gateway(ServiceMesh)` integrated with AKS. Configured with Internal Load Balancer + Istio Gateway + Istio VirtualService. For more information about `Istio Gateway`, check this [page.](ISTIO_README.md)
 
 ## Pre-requisites
 * Resource group
 
-## Deploying external API app
+## Test scenario 1: `api-call-app` in AKS & `external-api-app` in App service. Call external api from AKS.
+
+### Deploying external API app
 
 This demo used Azure App Service with `Python 3.11` runtime.
 
@@ -45,7 +43,7 @@ It needs to reply with `{"message":"Hello World"}`.
 
 > Since python applications need additional settings within code level for the Application Insights & Loggings, this app is using `opencensus-ext-azure` library to automatically send logs to Application Insights.
 
-## Running in local
+### Running in local
 
 Update `main.py` request url to the external api app.
 
@@ -62,7 +60,7 @@ Go to `localhost:80` in browser.
 
 Press `Click me` button to see `Hello World`.
 
-## Upload the image to Azure Container Registry
+### Upload the image to Azure Container Registry
 
 1. Create Azure Container Registry
 ```bash
@@ -161,7 +159,7 @@ spec:
         pathType: Prefix
 ``` -->
 
-## Deploying to Azure Kubernets Service
+### Deploying to Azure Kubernets Service
 1. Create AKS
 ```bash
 az aks create --resource-group myResourceGroup --name myAKSCluster --node-count 1 --enable-addons monitoring --generate-ssh-keys --attach-acr <acrName>
@@ -193,39 +191,14 @@ containers:
 
    ```bash
    kubectl apply -f internal-lb-test-config.yml
-   ```
-    iii) `istio-internal-config.yml`: Example of `Istio Gateway(ServiceMesh)` integrated with AKS
 
-    * Choose HTTP/HTTPS. Open `istio-internal-config.yml` and uncomment the protocol you want to use.
-    ```bash
-      - port:
-      # HTTPS protocol uses TLS passthrough
-      number: 443
-      name: https
-      protocol: HTTPS
-    tls:
-      mode: SIMPLE
-      credentialName: https-secret
-      # HTTP
-      # number: 80
-      # name: http
-      # protocol: HTTP
-    ```
-    
-    * If you want to make it HTTPS, you need to create a secret called `https-secret`. This should be a TLS certificate and key pair. **If it is signed by a certified CA**, such as Google, the **CA certificate should be included in the secret along with the server certificate and key pair.** 
-    * If it is not signed by a CA and you want to **make your own CA**, you should set CA certificate & key pair first. This procedure can use [AKS custom CA add-on](https://learn.microsoft.com/en-us/azure/aks/custom-certificate-authority).
-      * After that, create a server certificate and key pair signed by the CA. Then, create a secret with the CA certificate, server certificate and key pair.
-        ```bash
-        kubectl create -n aks-istio-ingress secret tls https-secret --key=<KEYFILE> --cert=<CERTFILE>
-        ```
-
-## Monitor result
-### Outbound Test Config
+### Monitor result
+#### Outbound Test Config
 Go to the Web App you deployed earlier. Click `Logs` in the left menu. Check the HTTP requests logs.
 
 ![webapp-logs](./docs/appservice_logs.png)
 
-### Internal LB Test Config
+#### Internal LB Test Config
 1. Check Internal LB
    ```bash
    kubectl get service
@@ -258,6 +231,36 @@ Go to the Web App you deployed earlier. Click `Logs` in the left menu. Check the
 
 
 3. Check AKS logs. Look for container logs.
+
+## Test scenario 2: Istio Service Mesh add-on with private LB
+
+### Pre-requisites
+Follow [this document](https://learn.microsoft.com/en-us/azure/aks/istio-deploy-addon) to enable Service Mesh add-on and deploy sample application with sidecar injection enabled.
+
+### Istio HTTP/HTTPS configuration
+
+`istio-internal-config.yml`
+* Choose HTTP/HTTPS. Open `istio-internal-config.yml` and uncomment the protocol you want to use.
+```bash
+  - port:
+  # HTTPS protocol uses TLS passthrough
+  number: 443
+  name: https
+  protocol: HTTPS
+tls:
+  mode: SIMPLE
+  credentialName: https-secret
+  # HTTP
+  # number: 80
+  # name: http
+  # protocol: HTTP
+```
+* If you want to make it HTTPS, you need to create a secret called `https-secret`. This should be a TLS certificate and key pair. **If it is signed by a certified CA**, such as Google, the **CA certificate should be included in the secret along with the server certificate and key pair.** 
+* If it is not signed by a CA and you want to **make your own CA**, you should set CA certificate & key pair first. This procedure can use [AKS custom CA add-on](https://learn.microsoft.com/en-us/azure/aks/custom-certificate-authority).
+* After that, create a server certificate and key pair signed by the CA. Then, create a secret with the CA certificate, server certificate and key pair.
+  ```bash
+  kubectl create -n aks-istio-ingress secret tls https-secret --key=<KEYFILE> --cert=<CERTFILE>
+  ```
 
 ### Istio Internal Test Config
 > If you deployed `private` AKS cluster, follow this step. If its public, skip to this step.
